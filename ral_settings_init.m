@@ -13,8 +13,13 @@ function ral_settings_init( )
         settings(1).path_audio_inputs = 'audio_inputs/';
         settings(1).path_user_database = 'ral_db_users.mat';
         settings(1).path_mfcc_database = 'ral_db_mfcc.mat';
+        
         settings(1).sample_rate_output = 16000;
         settings(1).slot_limit = 128;
+        
+        settings(1).trigger_cut_length = 0.9;
+        
+        settings(1).net_hiddenSizes = 30;
         settings(1).net_trainParam_goal = 0.000000001;
         settings(1).net_trainParam_show = 100;
         settings(1).net_trainParam_epochs = 1000;

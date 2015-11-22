@@ -1,7 +1,16 @@
-function [voix_prete] = prepare_voix(signal,fs, fsnew)
+function [voix_prete] = ral_prepare_sample(signal,fs, fsnew)
+%RAL_PREPARE_SAMPLE Prepare the sample for the MFCC extraction
+%   The steps are the following :
+%       1. Get the channel (mono/stereo)
+%       2. Exeption for NAO : we cut the trigger sound
+%       3. Pre-emphasis
+%       4. Resample if needed (fsnew=16000 Hz)
+%       5. Elimination of the DC component
+%       6. Delete silance
 
+load('ral_settings.mat');
 
-%*********Récupération du bon Channel si nécessaire *****************
+%********* Get the channel *****************
 [dimx, dimy] = size(signal);
 % conversion from 4 channels to 1 
 if dimy==4
@@ -15,35 +24,38 @@ end
 % figure;
 % subplot(3,2,1);plot(signal);
 
-%****** Cas particulier de NAO en .ogg on coupe la première seconde ******
-fin = size(signal,1);
-deb = fs*0.9;
-signal=signal(deb:fin,1);
+%****** Exception for NAO : we cut the 1rst second of the .ogg file
+% because we hear a trigger sound ******
+signalEnd = size(signal,1);
+% signalBegin = fs * 0.9;
+signalBegin = fs*settings.trigger_cut_length;
+signal=signal(signalBegin:signalEnd,1);
 % subplot(3,2,2); plot(signal);
 
 
-%This function applies a FIR-filter on a signal (PREEMPHASIS)
+% This function applies a FIR-filter on a signal (PREEMPHASIS)
 c = 0.95;
 b = [1, -c];
 a = 1;
 signal = filter(b,a,signal);
 % subplot(3,2,3);plot(signal);    
 
-%*******Rééchantillonner le signal si nécessaire à la valeur fsnew=16000 Hz
-
+%******* Resample the signal if necessary with fsnew=16000 Hz
 if fs~=fsnew    
     signal = resample(signal,fsnew,fs);
 end
 % subplot(3,2,4);plot(signal);
 
-%Elimination de la composante continue
+% Elimination of the DC component
+% Elimination de la composante continue
 sr = signal;
     srdct    = dct(sr);
     srdct(1) = 0;
     sr       = idct(srdct);
 signal = sr;
 % subplot(3,2,5);plot(signal);
-%**************** Suppession des silences ***************************
+
+%**************** Delete silence ***************************
 % step1 - Break the signal into frames of 01 seconds
 frame_duration = 0.1;
 frame_len = 0.1*fs;
