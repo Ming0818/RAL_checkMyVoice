@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 27-Oct-2015 21:48:57
+% Last Modified by GUIDE v2.5 28-Nov-2015 15:45:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -119,3 +119,67 @@ else
     fprintf('ERROR : not enought entries to recognize anyone\n');
 end
 
+
+% --- Executes on button press in trainButton.
+function trainButton_Callback(hObject, eventdata, handles)
+% hObject    handle to trainButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%===================================================
+load('ral_settings.mat');
+% Load mfcc features datas
+load(settings.path_mfcc_database);
+featuresData = mfcc_features_data;
+featuresSize = size(featuresData, 1);
+% Load user database
+load(settings.path_user_database);
+nbUsers = size(users, 1);
+listIDsUsers = users(:,2);
+
+% Prepare the inputs and outputs data
+nnInputs = [];
+nnOutnputs = [];
+
+for iFeatureData=1:featuresSize
+    aFeature = featuresData{iFeatureData,2};
+    [dimx,dimy] = size(aFeature);
+    nnInputs = [nnInputs aFeature'];
+
+    % Create an array of 0
+    userFeaturesArray   = zeros(nbUsers, dimx);
+    idUserFeature =  featuresData{iFeatureData,1};
+    % Associate the feature with the right user :
+    % IF the user ID on the feature is the same as the ID in the
+    % database line
+    % THEN 
+    %   the value becomes 1.
+    % ELSE 
+    %   the value becomes -1.
+    % FI
+    for listIDsUsers=1:(nbUsers)
+        if listIDsUsers==idUserFeature
+            userFeaturesArray(listIDsUsers,:) = 1;
+        else
+            userFeaturesArray(listIDsUsers,:) = -1;
+        end
+    end
+    nnOutnputs = [nnOutnputs userFeaturesArray];
+end
+
+%Normalization
+nnInputsNormalized = nnInputs;
+for iFeatureData=1:size(nnInputsNormalized,1)
+    v = nnInputsNormalized(iFeatureData,:);
+    v = v(:);
+    maxFeatureData = max([v;1]);
+    minFeatureData = min([v;-1]);
+    nnInputsNormalized(iFeatureData,:) = 2*(nnInputsNormalized(iFeatureData,:)-minFeatureData)/(maxFeatureData-minFeatureData)-1;
+end
+
+% Create and train the neural network
+net = nn_create(nnInputsNormalized,nnOutnputs);
+% Save the neural network for futur uses
+save('net.mat', 'net');
+fprintf('NN : end train\n');
+%===================================================

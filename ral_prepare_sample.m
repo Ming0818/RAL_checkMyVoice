@@ -34,7 +34,7 @@ signal=signal(signalBegin:signalEnd,1);
 
 
 % This function applies a FIR-filter on a signal (PREEMPHASIS)
-c = 0.95;
+c = settings.fir_filter_value;% 0.97;
 b = [1, -c];
 a = 1;
 signal = filter(b,a,signal);
@@ -70,7 +70,8 @@ for k = 1 : num_frames
 	% step2 - Identify non silent frames by finding frames with max amplitude more than 0.05
 	max_val = max(frame);
 	
-	if(max_val > 0.05)
+    % if(max_val > 0.07)
+	if(max_val > settings.silence_threshold)
 		% this frame is not silent
 		count = count + 1;
 		new_sig( (count-1)*frame_len + 1 : frame_len*count) = frame;

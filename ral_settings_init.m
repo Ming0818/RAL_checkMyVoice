@@ -8,7 +8,7 @@ function ral_settings_init( )
         fprintf('CREATE : %s\n', settingsFile);
         
         % show windows for debugging phase ?
-        settings(1).debug_mode = 1; 
+        settings(1).debug_mode = 0; 
         % main settings
         settings(1).path_audio_inputs = 'audio_inputs/';
         settings(1).path_user_database = 'ral_db_users.mat';
@@ -18,8 +18,10 @@ function ral_settings_init( )
         settings(1).slot_limit = 128;
         
         settings(1).trigger_cut_length = 0.9;
+        settings(1).fir_filter_value = 0.97;
+        settings(1).silence_threshold = 0.07;
         
-        settings(1).net_hiddenSizes = 30;
+        settings(1).net_hiddenSizes = 50; %30
         settings(1).net_trainParam_goal = 0.000000001;
         settings(1).net_trainParam_show = 100;
         settings(1).net_trainParam_epochs = 1000;
