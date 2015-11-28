@@ -22,7 +22,7 @@ function varargout = main(varargin)
 
 % Edit the above text to modify the response to help main
 
-% Last Modified by GUIDE v2.5 28-Nov-2015 15:45:37
+% Last Modified by GUIDE v2.5 28-Nov-2015 21:23:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -76,6 +76,61 @@ function varargout = main_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
+% --- Executes on selection change in listboxUsers.
+function listboxUsers_Callback(hObject, eventdata, handles)
+% hObject    handle to listboxUsers (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns listboxUsers contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listboxUsers
+
+% Load user database
+load('ral_settings.mat');
+load(settings.path_user_database);
+nbUsers = size(users, 1);
+if nbUsers > 0
+    handles.names = users(:,2);
+    set(handles.listboxUsers,'String',handles.names);
+end
+
+% --- Executes during object creation, after setting all properties.
+function listboxUsers_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listboxUsers (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+% --- Executes on key press with focus on listboxUsers and none of its controls.
+function listboxUsers_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to listboxUsers (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+switch eventdata.Key
+    case 'delete'
+        %Removes user from the database 
+        nameList = get(handles.listboxUsers, 'String');
+        userNameToDelete = nameList(get(handles.listboxUsers,'Value'));
+        user_delete(userNameToDelete{1});
+        %Removes user from the list
+        selectedValue = get(handles.listboxUsers,'Value'); 
+        prevValue = get(handles.listboxUsers, 'String'); 
+        len = length(prevValue); 
+        if len > 0
+          index = 1:len;
+          prevValue = prevValue(find(index ~= selectedValue),1);
+          set(handles.listboxUsers, 'String', prevValue, 'Value', min(selectedValue, length(prevValue))); 
+        end
+end
+
 % =========================================================================
 %   BUTTON ACTIONS
 % =========================================================================
@@ -106,7 +161,6 @@ load('ral_settings.mat');
 load(settings.path_mfcc_database);
 if size(mfcc_features_data, 1) >= 1
     % === Get the audio file with the prefix "recognize"
-    load('ral_settings.mat');
     inputsPath = settings.path_audio_inputs;
     audioFile = file_getFilesForAction('recognize');
     % === Try to recognize the user with this audio file
