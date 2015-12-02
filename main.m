@@ -182,6 +182,7 @@ function trainButton_Callback(hObject, eventdata, handles)
 
 %===================================================
 load('ral_settings.mat');
+fprintf('NN : begin train\n');
 % Load mfcc features datas
 load(settings.path_mfcc_database);
 featuresData = mfcc_features_data;

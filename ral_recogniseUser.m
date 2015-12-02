@@ -15,10 +15,12 @@ function [ userPseudo ] = ral_recogniseUser( p_audioFile )
     disp(time);
     fprintf('RAL : ID = %s, SCORE = %s\n', num2str(userId), num2str(score));
     
-    % TODO : indiquer un score minimum pour valider la reconnaisse d'un
-    % individu (ex : > 0.700)
-    
-    % Get the user's pseudo
-    [ idUser, userPseudo ] = user_getUserByID(userId);
+    % If the score is higher than 0.700 (recognize_user_threshold), then
+    % it's not an anonymous
+    userPseudo = 'anonymous';
+    if score > settings.recognize_user_threshold
+        % Get the user's pseudo
+        [ idUser, userPseudo ] = user_getUserByID(userId);
+    end
 end
 

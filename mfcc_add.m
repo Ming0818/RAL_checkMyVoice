@@ -2,6 +2,7 @@ function mfcc_add( p_audioFile )
 %DBMFCC_ADD add mfcc in the databse with the id user linked
 %   Detailed explanation goes here
 
+    fprintf('MFCC : ADD\n');
     load('ral_settings.mat');
     
     % Load the audio file

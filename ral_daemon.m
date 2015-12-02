@@ -9,37 +9,45 @@ ral_initialize();
 load('ral_settings.mat');
 
 if exist(settings.path_socket_files_to_download, 'file') == 2
-    % Load the list of files to download from NAO
-    load(settings.path_socket_files_to_download);
-    fprintf('DAEMON : load %s\n',settings.path_socket_files_to_download);
+    % Download files from NAO
+    daemonAction = ftp_getFiles();
     
-    % Check if there is at least one entry
-    if length(files_to_download) >= 1
-        nbFilesToDownload = length(files_to_download) - 2;
-        fprintf('DAEMON : %i files to download\n', nbFilesToDownload );
-        
-        % FTP Connexion
-        naoHost = strcat(strcat(files_to_download{1}, ':'), num2str(files_to_download{2}));
-        fprintf('FTP : host = %s\n', naoHost);
-        ftpobj = ftp(naoHost,'kimsavin','Se8yBapG');
-        % Move to dir
-        cd(ftpobj, 'www/shared'); 
-
-        for iColumn = 3:length(files_to_download)
-            % Download
-            fprintf('FTP : download %s\n', files_to_download{iColumn});
-            mget(ftpobj, files_to_download{iColumn}, settings.path_audio_inputs);
-            % Delete
-            % delete(ftpobj, files_to_download{iColumn});
-            fprintf('FTP : delete %s\n', files_to_download{iColumn});
+    % Get the MFCC
+    if strcmp(daemonAction, 'train')
+        fprintf('DAEMON : train');
+        audioFiles = file_getFilesForAction(daemonAction);
+        for audioFile = audioFiles
+            % === Init user : add the user if not created ===
+            user_initUser(audioFile{3});
+            % === Add MFCC to the database ===
+            mfcc_add(audioFile);
+            % === Delete the training file ===
+            file_deleteInputFile(audioFile{1});
         end
-
-        % FTP Déconnexion
-        close(ftpobj);
-        fprintf('FTP : end\n');
+        
+        % Train the Neural Network
+        nn_trainWithMFCC();
+    elseif strcmp(daemonAction, 'recognize')
+        fprintf('DAEMON : recognize');
+        % === Get the audio file with the prefix "recognize"
+        audioFile = file_getFilesForAction(daemonAction);
+        
+        % Get the saved users' MFCC
+        inputsPath = settings.path_audio_inputs;
+        
+        % === Try to recognize the user with this audio file
+        userPseudo = ral_recogniseUser(audioFile);
+        
+        % === Send the user to NAO
+        fprintf('DAEMON : Recognized user : %s\n', userPseudo);
+        
+        % === Delete the audio file
+    	file_deleteInputFile(audioFile{1});
     else
-        fprintf('DAEMON : no files to download\n');
+        fprintf('DAEMON : nothing to do');
+        pause(1);
     end
+    
 else
     fprintf('DAEMON : ERROR, %s not loaded\n',settings.path_socket_files_to_download);
 end
