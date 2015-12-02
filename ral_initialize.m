@@ -12,7 +12,7 @@ function ral_initialize
     
     ral_settings_init(); 
     ral_db_users_init();
-    ral_db_mfcc_init( )
+    ral_db_mfcc_init();
     
     % Add libraries
     addpath('libs/')
