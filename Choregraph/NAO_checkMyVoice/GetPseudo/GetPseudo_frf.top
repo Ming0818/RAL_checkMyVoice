@@ -1,0 +1,5 @@
+topic: ~GetPseudo()
+language: frf
+
+u:(pseudo _[epsi kim]) $1 $name=$1
+# $onStopped=$1

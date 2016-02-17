@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package uuid="nao_checkmyvoice-9e41ac">
+ <names>
+  <name lang="en_US">NAO_checkMyVoice</name>
+ </names>
+ <supportedLanguages>
+  <language>fr_FR</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+  <language>fr_FR</language>
+  <language>nl_NL</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path="behavior_1">
+   <nature>interactive</nature>
+   <permissions/>
+  </behaviorContent>
+  <dialogContent typeVersion="1.0" topicName="GetPseudo">
+   <topic path="GetPseudo/GetPseudo_frf.top" language="fr_FR"/>
+  </dialogContent>
+ </contents>
+</package>
